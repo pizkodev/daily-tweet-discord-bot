@@ -31,22 +31,22 @@ def post_to_discord(title, link, published):
     embed = {
         "title": "🕊️ EsportsMNG Update",
         "description": f"**New drop from EsportsMNG — don’t miss it 👀**\n\n{title}\n\n[View Tweet]({link})",
-        "color": 16753920,  # arancione MNG (puoi cambiare se vuoi)
+        "color": 16753920,
         "footer": {
             "text": f"Posted on {published}",
-            "icon_url": "https://raw.githubusercontent.com/tuo-username/tuo-repo/main/mng_scontornato_big.png"
+            "icon_url": "https://raw.githubusercontent.com/pizkodev/daily-tweet-discord-bot/main/mng_scontornato_big.png"
         },
         "thumbnail": {
-            "url": "https://raw.githubusercontent.com/tuo-username/tuo-repo/main/mng_scontornato_big.png"
+            "url": "https://raw.githubusercontent.com/pizkodev/daily-tweet-discord-bot/main/mng_scontornato_big.png"
         },
         "image": {
-            "url": "https://raw.githubusercontent.com/tuo-username/tuo-repo/main/mngesports.png"
+            "url": "https://raw.githubusercontent.com/pizkodev/daily-tweet-discord-bot/main/mngesports.png"
         }
     }
 
     payload = {
         "username": "MNG Esports Bot",
-        "avatar_url": "https://raw.githubusercontent.com/tuo-username/tuo-repo/main/mng_scontornato_big.png",
+        "avatar_url": "https://raw.githubusercontent.com/pizkodev/daily-tweet-discord-bot/main/mng_scontornato_big.png",
         "embeds": [embed]
     }
 
