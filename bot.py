@@ -1,36 +1,40 @@
+import feedparser
 import requests
 import os
-import tweepy
 
-# Parametri da GitHub Secrets
-BEARER_TOKEN = os.environ.get("BEARER_TOKEN")
-TWITTER_USERNAME = os.environ.get("TWITTER_USERNAME")
-DISCORD_WEBHOOK = os.environ.get("DISCORD_WEBHOOK")
+# Variabili d’ambiente (dal repo GitHub → Settings → Secrets)
+DISCORD_WEBHOOK = os.getenv("DISCORD_WEBHOOK")
+RSS_FEED_URL = os.getenv("RSS_FEED_URL")
+LAST_TWEET_FILE = "last_tweet.txt"
 
-# Controllo variabili
-if not BEARER_TOKEN or not TWITTER_USERNAME or not DISCORD_WEBHOOK:
-    raise ValueError("Assicurati che BEARER_TOKEN, TWITTER_USERNAME e DISCORD_WEBHOOK siano impostati nelle variabili d'ambiente!")
+def get_latest_tweet():
+    feed = feedparser.parse(RSS_FEED_URL)
+    if not feed.entries:
+        return None, None
+    latest = feed.entries[0]
+    return latest.link, latest.title
 
-# Configura Tweepy client v2
-client = tweepy.Client(bearer_token=BEARER_TOKEN)
+def already_posted(link):
+    if not os.path.exists(LAST_TWEET_FILE):
+        return False
+    with open(LAST_TWEET_FILE, "r") as f:
+        last = f.read().strip()
+    return last == link
 
-# Prendi l'ultimo tweet dell'utente
-user = client.get_user(username=TWITTER_USERNAME)
-tweets = client.get_users_tweets(user.data.id, max_results=5, tweet_fields=["created_at","text","id"])
+def save_last_post(link):
+    with open(LAST_TWEET_FILE, "w") as f:
+        f.write(link)
 
-if tweets.data:
-    latest = tweets.data[0]
-    tweet_text = latest.text
-    tweet_url = f"https://x.com/{TWITTER_USERNAME}/status/{latest.id}"
-
-    # Invia su Discord
+def post_to_discord(title, link):
     data = {
-        "content": f"{tweet_text}\n{tweet_url}"
+        "content": f"🕊️ **New Tweet Posted!**\n**{title}**\n{link}"
     }
-    response = requests.post(DISCORD_WEBHOOK, json=data)
-    if response.status_code == 204:
-        print("Posted successfully to Discord!")
+    requests.post(DISCORD_WEBHOOK, json=data)
+
+if __name__ == "__main__":
+    link, title = get_latest_tweet()
+    if link and not already_posted(link):
+        post_to_discord(title, link)
+        save_last_post(link)
     else:
-        print(f"Error posting to Discord: {response.status_code} - {response.text}")
-else:
-    print("No tweets found.")
+        print("Nessun nuovo tweet trovato.")
